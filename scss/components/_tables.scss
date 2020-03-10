@@ -1,0 +1,22 @@
+// Does NOT overload bootstrap base table styles!
+.table-header { // tr
+    > th {
+        // inherits bold
+        border-top: none;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+}
+.td--pad {
+    // more semantic method for adding a little space to very small cells
+    padding-left: $grid-gutter-width/2;
+    padding-right: $grid-gutter-width/2;
+}
+.td--stretch {
+    // more semantic version of w-100
+    width: 100%;
+}
+.td--half-stretch {
+    // more semantic version of w-50
+    width: 50%;
+}

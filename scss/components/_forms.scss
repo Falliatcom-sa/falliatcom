@@ -1,0 +1,31 @@
+.form-group label {
+    font-size: $small-font-size;
+}
+.label--required {
+    &:after {
+        color: $danger;
+        content: "*";
+    }
+}
+
+.input--inline {
+    // subclass form-group or input for inline form elements inside a d-flex container
+    margin-right: $grid-gutter-width/3;
+    &:last-child {
+        margin-right: 0;
+    }
+}
+
+
+// Custom error styling outside BS styles
+.form-group__error {
+    color: $danger;
+    font-size: $small-font-size;
+    margin-top: $grid-gutter-width/4;
+    padding-inline-start: 1rem;
+}
+// disabled elements should have less opacity
+input[type=checkbox]:disabled,
+input[type=radio]:disabled {
+    opacity: 0.7;
+}

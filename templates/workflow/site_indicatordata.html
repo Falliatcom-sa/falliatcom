@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load i18n %}
+{% block bread_crumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/workflow/siteprofile_list/0/0/">{% trans "Sites" %}</a></li>
+        <li class="active breadcrumb-item">{% trans "Site Data" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+{% block page_title %}{% blocktrans %}Indicator Data for <small>{{ site }}</small>{% endblocktrans %}{% endblock %}
+
+{% block content %}
+    {% regroup results by program as program_list %}
+
+    {% for program in program_list %}
+        <h3><a href="{% url 'program_page' program.grouper.id %}">{{ program.grouper }}</a></h3>
+        <table class="table mb-4">
+            <tr class="">
+                <th>{% trans "Achieved" %}</th>
+                <th>{% trans "Periodic Target" %}</th>
+            </tr>
+            {% regroup program.list by indicator as indicator_list %}
+            {% for indicator in indicator_list %}
+                <tr class="bg-gray-lighter">
+                    <th colspan="2">{{ indicator.grouper }}</th>
+                </tr>
+                {% for d in indicator.list %}
+                    <tr class="bg-white">
+                        <td>{{ d.achieved }}</td>
+                        <td>{{ d.periodic_target }}</td>
+                    </tr>
+                {%  endfor %}
+            {% endfor %}
+        </table>
+    {% empty %}
+    {% trans "There is no indicator data for this site." %}
+    {% endfor %}
+{% endblock content %}

@@ -1,0 +1,61 @@
+*.log
+login.log.*
+*.pot
+*.pyc
+# Python bytecode:
+*.py[co]
+
+# Packaging files:
+*.egg*
+
+# Editor temp files:
+*.swp
+*.swo
+*~
+
+# SQLite3 database files:
+*.db
+
+# Logs:
+*.log
+
+#allvritualenv
+.env/
+venv/
+venv-ta/
+
+conf
+conf/awstats.conf
+
+#Misc.
+.idea/
+.vscode/
+.DS_Store
+media/
+client_secrets.json
+tola/settings/local_secret.py
+*.crt
+*.key
+error.log
+*.secret
+settings.secret.yml
+assets/
+templates/links.html
+coverage_html
+.coverage
+coverage/
+tola/settings/test_local.py
+log_convert_lop_to_numeric
+
+# SASS Source Map
+*.css.map
+
+# node modules
+node_modules
+
+webpack-stats-local.json
+webpack-stats-vagrant.json
+.vagrant
+site.retry
+.eslintrc.yml
+requirements.txt

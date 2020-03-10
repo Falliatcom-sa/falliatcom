@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% load render_bundle from webpack_loader %}
+{% load group_tag %}
+{% block title %}{% trans "Sites" %} | {% endblock %}
+{% block page_title %}{% trans "Sites" %}{% endblock %}
+{% block bread_crumb %}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="btn-group" role="group">
+    <button class="btn btn-secondary btn-sm dropdown-toggle"
+            type="button"
+            id="programDropdown"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false">
+        {% trans "Programs" %}
+    </button>
+    <div class="dropdown-menu" role="menu" aria-labelledby="programDropdown">
+        <a class="dropdown-item" href="/workflow/siteprofile_list/0/0">-- {% trans "All" %} --</a>
+        {% for program in getPrograms %}
+            <a class="dropdown-item"
+                href="/workflow/siteprofile_list/{{ program.id }}/0/">
+                {{ program.gaitid}} - {{ program.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+<a href="/workflow/siteprofile_add" class="btn btn-link btn-add"><i class="fas fa-plus-circle"></i> {% trans "Add site" %}</a>
+
+<br><br>
+<style>
+    #map { height: 480px; }
+</style>
+{% load crispy_forms_tags %}
+{% crispy form form.helper %}
+<h4>{% trans "Site Profile Map and List" %}</h4>
+
+    <div id="country_map"></div>
+
+    
+
+ <!-- Display site profiles & projects -->
+<table class="table table-sm table-hover table-striped">
+    <tr>
+        <th style="min-width:120px;">{% trans "Date created" %}</th>
+        <th>{% trans "Site name" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th>{% trans "Site type" %}</th>
+        <th style="width:110px;">&nbsp;</th>
+    </tr>
+    {% if getSiteProfile %}
+        {% for item in getSiteProfile %}
+            <tr>
+                <td>
+                    <a href="/workflow/siteprofile_update/{{ item.id }}">{{ item.create_date|date:"MEDIUM_DATE_FORMAT"|default:'' }}</a>
+                </td>
+                <td><a href="/workflow/siteprofile_update/{{ item.id }}">{{ item.name }}</a></td>
+                {% if item.status == 1 %}
+                    <td>
+                        <a href="/workflow/siteprofile_update/{{ item.id }}">
+                            <span class="badge badge-secondary">{% trans "Active" %}</span>
+                        </a>
+                    </td>
+                {%else%}
+                <td><a href="/workflow/siteprofile_update/{{ item.id }}"><span class="badge">{% trans "Inactive" %}</span></a></td>
+                {%endif%}
+                <td><a href="/workflow/siteprofile_update/{{ item.id }}">{{ item.type }}</a></td>
+                <td class="text-nowrap">
+                    <a href="/workflow/siteprofile_delete/{{ item.id }}"
+                       class="btn btn-sm btn-text p-0 pr-2 text-danger"><i class="fas fa-trash-alt"></i>&nbsp;{% trans "Delete site" %}
+                    </a>
+                    <a href="/workflow/site_indicatordata/{{item.id}}/"
+                       class="btn btn-sm p-0 pr-2 btn-text"><i class="fas fa-table"></i>&nbsp;{% trans "Indicator data" %}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    {% else %}
+    <tr>
+        <td colspan="5">{% trans "No Site Profiles yet." %}</td>
+    </tr>
+    {% endif %}
+</table>
+
+<!-- paginate site profile listing -->
+ <div class="admin-list__metadata">
+    <div class="metadata__controls">
+        <ul class="pagination">
+            {% if getSiteProfile.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?user_list={{user_list}}&page={{ getSiteProfile.previous_page_number }}">‹</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?user_list={{user_list}}&page={{ getSiteProfile.previous_page_number }}"> {{getSiteProfile.previous_page_number}}</a>
+                </li>
+            {% endif %}
+
+            {% with getSiteProfile.number as site_num %}
+                <li class="page-item active">
+                    <a class="page-link" href="">{{ site_num }}</a>
+                </li>
+            {% endwith %}
+
+            {% if getSiteProfile.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?user_list={{user_list}}&page={{ getSiteProfile.next_page_number }}">
+                        {{ getSiteProfile.next_page_number }}</a>
+                </li>
+                {% ifnotequal getSiteProfile.next_page_number getSiteProfile.paginator.num_pages %}
+                    {% with getSiteProfile.paginator.num_pages as num_pages %}
+                        <li class="page-item"><a class="page-link" href="">...</a></li>
+                        <li class="page-item"><a class="page-link" href="?user_list={{user_list}}&page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                    {% endwith %}
+                {% endifnotequal %}
+                <li class="page-item">
+                    <a class="page-link" href="?user_list={{user_list}}&page={{ getSiteProfile.next_page_number }}">›</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="metadata__count">
+        <ul class="pagination">
+            {# Translators: Shows the user how many results will be listed on each page of the results list #}
+            <li class="page-item align-items-center"><span class="text-muted text-small">{% trans "results per page:" %}&nbsp;</span></li>
+            <li class="page-item"><a class="page-link {% if default_list == 5 %}active{% endif %}"
+                    href="?user_list=10">5</a>
+            </li>
+            <li class="page-item {% if default_list == 10 %}active{% endif %}">
+                <a class="page-link "
+                    href="?user_list=10">10</a>
+            </li>
+            <li class="page-item {% if default_list == 20 %}active{% endif %}">
+                <a class="page-link"
+                    href="?user_list=20">20 </a>
+            </li>
+            <li class="page-item {% if default_list == 30 %}active{% endif %}">
+                <a class="page-link"
+                    href="?user_list=30" >30</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js_in_body %}
+<script>
+    {% localize off %}
+    const markers = [
+        {
+            label: "{% trans 'Sites' %}",
+            icon: {
+                className: 'map-marker indicator',
+                iconSize: [20, 20]
+            },
+            items: [
+                {% for item in getSiteProfile %}
+                    {
+                        popup: "<b>{{ item.country }}</b><br/>{% trans 'Site with result' %}<br> <a href='{% url 'siteprofile_update' item.id %}'>{{ item.name }}</a>",
+                        latitude: "{{ item.latitude }}",
+                        longitude: "{{ item.longitude }}"
+                    },
+                {% endfor %}
+            ]
+        }
+    ];
+    {% endlocalize %}
+    const mapContext = {
+        latitude: "30.4006",
+        longitude: "60.8622",
+        zoom: "4",
+        markers: markers,
+        userCountryCodes: {}
+    };
+</script>
+{% render_bundle 'home_country_map' %}
+{% endblock %}
+

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+{% load i18n mytags %}
+{% block title %}{% trans "Indicator Performance Tracking Table" %} | {% endblock %}
+{% block page_title %}{% trans "Indicator Performance Tracking Table" %}{% endblock %}
+
+{% block content %}
+<div id="id_div_top_quickstart_iptt" >
+    
+</div>
+        {% comment %}
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Periodic targets vs. actuals" %}</h5>
+                    <p class="card-subtitle text-muted mb-2">{% trans "View results organized by target period for indicators that share the same target frequency." %}</p>
+                    <div class="form-group">
+                        <label for="tva-form-program-select" class="col-form-label text-uppercase">
+                            {% trans "Program" %}
+                        </label>
+                        <div id="quickstart-tva-form-program-select-react"></div>
+                    </div>
+                    <div class="form-group pt-4">
+                        <label for="tva-form-targetperiod-select" class="col-form-label text-uppercase">
+                            {% trans "Target periods" %}
+                        </label>
+                        <div id="quickstart-tva-form-period-select-react"></div>
+                    </div>
+                    <div class="form-group d-lg-flex pb-4">
+                        <div id="quickstart-tva-form-show-all-react"></div>
+                        <div id="quickstart-tva-most-recent-check-react"></div>
+                        <div id="quickstart-tva-most-recent-count-react"></div>
+                    </div>
+                    <div class="d-flex justify-content-center mb-1" id="quickstart-tva-submit-button-react"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Recent progress for all indicators" %}</h5>
+                    <p class="card-subtitle text-muted mb-2">{% trans "View the most recent two months of results. (You can customize your time periods.) This report does not include periodic targets." %}</p>
+                    <div class="form-group">
+                        <label for="tva-form-program-select" class="col-form-label text-uppercase">
+                            {% trans "Program" %}
+                        </label>
+                        <div id="quickstart-timeperiods-form-program-select-react"></div>
+                    </div>
+                    <div class="d-flex justify-content-center mb-1" id="quickstart-timeperiods-submit-button-react"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endcomment %}
+{% endblock content %}
+
+
+
+{% block extra_js_in_body %}
+    <script>
+        let jsContext = {{ js_context|js }};
+    </script>
+
+    {% render_bundle 'iptt_quickstart' %}
+{% endblock %}

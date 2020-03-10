@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load l10n i18n mytags has_program_role %}
+{% load render_bundle from webpack_loader %}
+{# Translators: Page title if the user has not selected country #}
+{% block title %}{{ active_country|default:_("No available programs") }} | {% endblock %}
+{% block page_title %}{{ active_country|default:_("No available programs") }}{% endblock %}
+
+{% block bodyclasses %}home{% endblock %}
+
+{% block header_extras %}
+<a class="text-muted" href="{% url 'siteprofile_list' program_id=0 activity_id=0 %}"><small>{% trans "Browse all sites" %}</small></a>
+
+{% endblock %}
+
+{% block content %}
+
+{% if active_country %}
+<section class="home__featured-country">
+    <div class="featured-country__map">
+        <div id="country_map"></div>
+        <div class="featured-country__map-key">
+            <div class="featured-country__map-key-results-color-box"></div>
+            <span>{% trans 'Sites with results' %}</span>
+            <div class="featured-country__map-key-without-results-color-box ml-3"></div>
+            <span>{% trans 'Sites without results' %}</span>
+        </div>
+    </div>
+    <div class="featured-country__overview-gauges">
+        <h3>{% trans "Monitoring and Evaluation Status" %}</h3>
+        <p>{% trans "Are programs trackable and backed up with evidence?" %}</p>
+        <div class="overview-gauges__gauges">
+
+            {% gauge_tank_small "targets_defined" %}
+
+            {% gauge_tank_small "reported_results" %}
+
+            {% gauge_tank_small "results_evidence" %}
+
+        </div>
+    </div>
+</section><!--/.home__featured-country-->
+<section class="home__program-list">
+    {% if no_programs > 0 %}
+    <h2>{% blocktrans %}{{ no_programs }} active programs{% endblocktrans %}</h2>
+    {% else %}
+    {% blocktrans %}
+    <h2>No available programs</h2>
+    {% endblocktrans %}
+    {% endif %}
+    {% for program in programs %}
+        {% has_program_role user program "high" as has_high_role %}
+        <article class="program-list__program card">
+            <div class="card-header">
+                <div class="program-header__info">
+                    <h3>{% if program.indicator_count %}
+                        <a href="{{ program.program_page_url }}" class="text-dark">{{ program.name }}</a>
+                        {% else %}
+                        {{ program.name }}
+                        {% endif %}
+                    </h3>
+                    {% if program.indicator_count and program.reporting_period_start and program.reporting_period_end %}
+                        <ul class="nav nav--text-list">
+                            <li class="nav-item">
+                                <small><a href="{{ program.program_page_url }}" class="">{% trans "Program page" %}</a></small>
+                            </li>
+                            {% if program.has_started %}
+                            <li class="nav-item">
+                                {# TODO: is this querystring always the same? #}
+                                <small><a href="{% url "iptt_report" program.id "timeperiods" %}?timeperiods=7&timeframe=2&numrecentperiods=2" class="">{% trans "Recent progress report" %}</a></small>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {% if program.reporting_period_start and program.reporting_period_end %}
+                    {% if has_high_role %}
+                        {% program_complete %}
+                    {% else %}
+                        {% program_complete True %}
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if not program.reporting_period_start or not program.reporting_period_end %}
+                    {% if has_high_role %}
+                        <p>
+                            {% blocktrans with id=program.id start_date=program.start_date end_date=program.end_date reporting_period_start=program.reporting_period_start reporting_period_end=program.reporting_period_end %}
+                            Before adding indicators and performance results, we need to know your program's
+                            <a
+                                id="id_link_reporting_period_{{ id }}"
+                                class=""
+                                href="#"
+                                data-toggle="modal"
+                                data-program="{{ id }}"
+                                data-progstart="{{ start_date }}"
+                                data-progend="{{ end_date }}"
+                                data-rptstart="{{ reporting_period_start }}"
+                                data-rptend="{{ reporting_period_end }}"
+                                data-indicator_count="{{program.indicator_count}}"
+                                data-target="#id_reporting_period_modal">
+                                reporting start and end dates.
+                            </a>
+                            {% endblocktrans %}
+                        </p>
+                    {% else %}
+                        {# Translators: A message telling the user why they can not access it due to the start and end date not being set. #}
+                        <p>{% trans "Before you can view this program, an administrator needs to set the program's start and end dates." %}</p>
+                    {% endif %}
+                {% elif program.metrics.indicator_count == 0 %}
+                    {% if has_high_role %}
+
+                        {% if program.results_framework %}
+                            {# Using new RF levels, so need to create framework first #}
+
+                            <a href="{% url 'results_framework_builder' program.id %}">
+                            {% if program.levels.exists %}
+                                {# Translators: link users to the new results framework builder page when a level already exists #}
+                                {% trans 'Start adding indicators to your results framework.' %}
+                            {% else %}
+                                {# Translators: link users to the new results framework builder page - no levels currently exist #}
+                                {% trans 'Start building your results framework and adding indicators.' %}
+                            {% endif %}
+                            </a>
+
+                        {% else %}
+                            {# Using old style levels, so just allow indicator creation right away #}
+                            <h4>{% trans "No indicators have been entered for this program." %}</h4>
+                            <a href="#" role="button" data-add-indicator="{{ program.id }}" class="btn-link btn-add">
+                                <i class="fas fa-plus-circle"></i> {% trans "Add indicator" %}
+                            </a>
+                        {% endif %}
+
+                    {% else %}
+                        {# Translators: A message telling the user a program can not yet be accessed because indicators have not been created on it. #}
+                        <p>{% trans "No indicators have been entered for this program." %}</p>
+                    {% endif %}
+                {% else %}
+                    {% if program.metrics.targets_defined %}
+                        <h4>
+                            {% blocktrans %}Program metrics <small>for target periods completed to date</small>{% endblocktrans %}
+                            {% include "indicators/program_target_period_info_helptext.html" %}
+                        </h4>
+                        <div class="status__gauges">
+                            {% gauge_band False %}
+
+                            {% gauge_tank "targets_defined" False %}
+
+                            {% gauge_tank "reported_results" False %}
+
+                            {% gauge_tank "results_evidence" False %}
+                        </div>
+                    {% else %}
+                        {% blocktrans with program.program_page_url as program_page_url %}
+                        <h4>All indicators are missing targets.</h4>
+                        <p>Visit the <a href="{{ program_page_url }}">Program page</a> to set up targets.</p>
+                        {% endblocktrans %}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </article><!--/.program-list__program-->
+    {% endfor %}
+    <!--/.program-list__program-->
+</section>
+{% else %}
+<section class="home__no-access">
+    {# Translators: message shown when there are no programs available to the user, or no active programs in a country #}
+    {% blocktrans %}
+    <p>
+        You do not have permission to view any programs. You can request permission from your TolaData administrator.
+    </p>
+    <p>
+        You can also reach the TolaData team by using the <a href="https://docs.google.com/forms/d/e/1FAIpQLSclm2PAT9TJ9q23TT6YWQg6hj3EndUAdyF5k6kvNJHu6njNtw/viewform">feedback form.</a>
+    </p>
+    {% endblocktrans %}
+</section>
+{% endif %}
+
+{% include "indicators/indicator_list_modals.html" %}
+{% include "indicators/indicator_form_common_js.html" %}
+
+{% endblock content %}
+
+
+{% block extra_js_in_body %}
+    <script>
+        const userCountryCodes = {{ user_country_codes|safe }};
+        {% if active_country %}
+            {% localize off %}
+            const latitude = "{{ active_country.latitude|default_if_none:"51.505" }}";
+            const longitude = "{{ active_country.longitude|default_if_none:"-0.09" }}";
+            const zoom = "{{ active_country.zoom|default_if_none:"13" }}";
+            const code = "{{ active_country.code }}";
+            const markers = [
+                {
+                    label: "{% trans 'Sites with results' %}",
+                    icon: {
+                        className: 'map-marker indicator',
+                        iconSize: [20, 20]
+                    },
+                    items: [
+                        {% for item in sites_with_results %}
+                            {
+                                popup: "<b>{{ item.country }}</b><br/>{% trans 'Site with result' %}<br> <a href='{% url 'siteprofile_update' item.id %}'>{{ item.name }}</a>",
+                                latitude: "{{ item.latitude }}",
+                                longitude: "{{ item.longitude }}"
+                            },
+                        {% endfor %}
+                    ]
+                },
+                {
+                    label: "{% trans 'Sites without results' %}",
+                    icon: {
+                        className: 'map-marker',
+                        iconSize: [20, 20]
+                    },
+                    items: [
+                        {% for item in sites_without_results %}
+                            {
+                                popup: "<b>{{ item.country }}</b><br/>{% trans 'Site without result' %}<br> <a href='{% url 'siteprofile_update' item.id %}'>{{ item.name }}</a>",
+                                latitude: "{{ item.latitude }}",
+                                longitude: "{{ item.longitude }}"
+                            },
+                        {% endfor %}
+                    ]
+                },
+            ];
+            {% endlocalize %}
+        {% else %}
+            //defaults - England, but we can override - also, shouldn't this never happen?
+            const latitude = "51.505";
+            const longitude = "-0.09";
+            const zoom = "13";
+            const markers = [];
+        {% endif %}
+        const mapContext = {
+            latitude: latitude,
+            longitude: longitude,
+            zoom: zoom,
+            code: code,
+            markers: markers,
+            userCountryCodes: userCountryCodes
+        };
+        let reloadPage = false;
+    
+        // Open indicator form modal if no RF and no indicators present on program
+        $("a[data-add-indicator]").click((e) => {
+            e.preventDefault();
+            let programId = $(e.target).data('addIndicator');
+            openCreateIndicatorFormModal({programId});
+        });
+    
+        // when indicator creation modal form completes a save
+        $('#indicator_modal_div').on('created.tola.indicator.save', (e, params) => {
+            // Only set a bool instead of reloading to support "create and add another..." functionality
+            reloadPage = true;
+        });
+    
+        $('#indicator_modal_div').on('hidden.bs.modal', (e) => {
+            if (reloadPage) {
+                location.reload(true);
+            }
+        });
+    </script>
+    {% render_bundle 'home_country_map' %}
+{% endblock %}

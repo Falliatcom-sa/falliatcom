@@ -1,0 +1,104 @@
+// Forms
+// extremely custom selectors for applying very specific styles to forms
+
+.help-block { // emulates .form-text.text-muted
+    color: $gray-600 !important; // was: #6c757d!important;
+    display: block;
+    margin-top: .25rem;
+}
+.has-crispy-form {
+    .tab-content.panel-body {
+        background: white;
+        border: 1px solid $gray-300; // was: #dee2e6;
+        border-top-width: 0;
+        margin-top: 0;
+        padding: 1rem;
+    }
+    .nav-tabs {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    .input-group {
+        align-items: center;
+    }
+    #div_id_name { /* overloads jankety overload for select2, see line 481 this file */
+        height: auto;
+    }
+}
+.input-group-addon {
+    margin: 0 0.5rem;
+}
+.has-error {
+    color: $danger;
+    .text-muted {
+        color: inherit !important;
+    }
+}
+// Used for turning red borders off for input fields with errors
+.border-1px input {
+    border: 1px solid $gray-300;
+}
+
+// turn off arrows from input[type=number]
+input[type=number] {
+    -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-symbol-percent {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    &:after {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: auto;
+        content:"%";
+        right: 0.5rem;
+    }
+    .input-value, input.input-value { // adds extra specificity vs. .periodic-target .input-value
+        padding-right: 1.5rem;
+    }
+}
+.hide-askerisks {
+    // for hiding "required" asterisks on crispy forms
+    // apply to the <form> element
+    .asteriskField {
+        display: none;
+    }
+}
+
+// submit/reset buttons + help link
+.form-actions {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-top: $grid-gutter-width;
+    .form-group {
+        margin-bottom: 0;
+    }
+}
+
+//reskin react-select modals to match bootstrap selects
+.tola-react-select {
+    width: 100%;
+    color: $black;
+}
+
+
+.tola-react-multiselect-row > div {
+    width: 100%;
+    color: $black;
+    button {
+        width: 100%;
+    }
+    > div {
+        width: 100%;
+    }
+}
+
